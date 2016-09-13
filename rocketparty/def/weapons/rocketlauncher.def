@@ -99,7 +99,7 @@ entityDef weapon_rocketlauncher
 	"recoilAngles"				"-.20 0 0"
 	
 	"mtr_flashShader"			"lights/muzzleflash"
-	"flashColor"				"0.99 0.31 .31" //pink flash
+	"flashColor"				"0.99 0.31 .31" //NEW: pink flash
 	"flashRadius"				"200"
 	"flashPointLight"			"1"
 	"flashTime"					".1"
@@ -325,7 +325,7 @@ entityDef projectile_rocket
 	"def_damage"				"damage_rocketDirect"
 	"def_splash_damage"			"damage_rocketSplash"
 																											
-	"speed"						"100" //speed edit for 1st commit
+	"speed"						"50" //NEW: speed edit for 1st commit
 	"fuse"						"6"
 	"push"						"48000"
 	
