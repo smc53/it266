@@ -321,11 +321,12 @@ entityDef projectile_rocket
 	"noshadows"					"1"
 	"clipmask_largeshot"		"1"
 								
-	"model"						"models/weapons/rocketlauncher/rocket.lwo"
+	//"model"						"models/weapons/rocketlauncher/rocket.lwo"
+	"model"						"models/weapons/gauntlet/gauntlet.lwo"
 	"def_damage"				"damage_rocketDirect"
 	"def_splash_damage"			"damage_rocketSplash"
 																											
-	"speed"						"300" //NEW: speed edit for 1st commit
+	"speed"						"100" //NEW: speed edit for 1st commit
 	"fuse"						"6"
 	"push"						"48000"
 	
