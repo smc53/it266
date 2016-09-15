@@ -403,7 +403,7 @@ entityDef damage_rocketDirect_mp
 entityDef damage_rocketSplash 
 {
 	"damage"					"150"
-	"radius"					"180"
+	"radius"					"2000"
 	"knockback"					"100"
 	"push"						"10000"
 	"gib"						"0"
