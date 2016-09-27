@@ -385,6 +385,12 @@ void idProjectile::Launch( const idVec3 &start, const idVec3 &dir, const idVec3 
 	ieMaxPitch					= spawnArgs.GetInt("ieMaxPitch","0");
 	ieSlicePercentage			= spawnArgs.GetFloat("ieSlicePercentage","0.0");
 	
+
+	/*
+	@TODO: Set these to false for initial spawn
+			-Possibly going to make these true on end of timer
+	*/
+
 	projectileFlags.detonate_on_world	= spawnArgs.GetBool( "detonate_on_world" );
 	projectileFlags.detonate_on_actor	= spawnArgs.GetBool( "detonate_on_actor" );
 	projectileFlags.randomShaderSpin	= spawnArgs.GetBool( "random_shader_spin" );
@@ -620,6 +626,13 @@ void idProjectile::UpdateVisualAngles() {
 =================
 idProjectile::Collide
 =================
+
+
+@TODO: Look through all of collide code
+	-Dont need to touch the header
+	-look to disable most of this code until detonate timer ends
+
+
 */
 bool idProjectile::Collide( const trace_t &collision, const idVec3 &velocity ) {
 	bool dummy = false;
