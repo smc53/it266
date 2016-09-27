@@ -9640,6 +9640,22 @@ void idPlayer::Think( void ) {
 		inBuyZone = false;
 
 	inBuyZonePrev = false;
+
+
+
+	//@TODO: Update rockets following player
+	//		-Create list of 4 bombs (call in player init() )
+	//		-Create new projectile that follows player
+
+	/*
+	for(int i = 0; i < bombs.length(); i++){
+		bombs[i].update();
+		bombs[i]->think();
+	}
+	*/
+
+
+
 }
 
 /*
