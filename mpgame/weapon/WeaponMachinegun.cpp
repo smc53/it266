@@ -224,8 +224,21 @@ stateResult_t rvWeaponMachinegun::State_Fire ( const stateParms_t& parms ) {
 		STAGE_INIT,
 		STAGE_WAIT,
 	};	
+
+	idPlayer* my_player = GetOwner();
+
+	idVec3 my_origin;
+	idMat3 my_axis;
+
+	if(my_player == NULL) { return SRESULT_ERROR; }
+
+	my_player->GetPosition(my_origin, my_axis);
+
 	switch ( parms.stage ) {
 		case STAGE_INIT:
+
+			gameLocal.Printf( "test warning %f\n", my_origin.x );
+
 			if ( wsfl.zoom ) {
 				nextAttackTime = gameLocal.time + (altFireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
 				Attack ( true, 1, spreadZoom, 0, 1.0f );
@@ -233,6 +246,10 @@ stateResult_t rvWeaponMachinegun::State_Fire ( const stateParms_t& parms ) {
 			} else {
 				nextAttackTime = gameLocal.time + (fireRate * owner->PowerUpModifier ( PMOD_FIRERATE ));
 				Attack ( false, 1, spread, 0, 1.0f );
+				Attack ( false, 1, spread*2, 0, 1.0f );
+				Attack ( false, 1, spread*10, 0, 1.0f );
+				Attack ( false, 1, spread*50, 0, 1.0f );
+				Attack ( false, 1, spread*500, 0, 1.0f );
 			}
 			PlayAnim ( ANIMCHANNEL_ALL, "fire", 0 );	
 			return SRESULT_STAGE ( STAGE_WAIT );
