@@ -79,6 +79,24 @@ const int	MAX_INVENTORY_ITEMS = 20;
 
 const int	ARENA_POWERUP_MASK = ( 1 << POWERUP_AMMOREGEN ) | ( 1 << POWERUP_GUARD ) | ( 1 << POWERUP_DOUBLER ) | ( 1 << POWERUP_SCOUT );
 
+
+//===========================
+//	No time data
+//==========================
+
+const int nt_BOMBCOUNT_MAX = 2;
+int bombCount_current = 0;
+
+//timer, total time, current time
+
+//move this to player.init/restore
+int nt_startTime;// = gameLocal.time; //ms
+int nt_endTime;
+int nt_BOMBTIME_MAX = 30000;
+
+//==== end NO TIME ==============================
+
+
 //const idEventDef EV_Player_HideDatabaseEntry ( "<hidedatabaseentry>", NULL );
 const idEventDef EV_Player_ZoomIn ( "<zoomin>" );
 const idEventDef EV_Player_ZoomOut ( "<zoomout>" );
@@ -236,6 +254,12 @@ void idInventory::Clear( void ) {
 /*
 ==============
 idInventory::GivePowerUp
+
+
+@TODO: Add increment / decrement diffusal
+	-May need to pass pointer to custom powerups
+
+
 ==============
 */
 void idInventory::GivePowerUp( idPlayer *player, int powerup, int msec ) {
@@ -826,6 +850,10 @@ int	idInventory::AmmoRegenTimeForWeaponIndex( int weaponIndex ) {
 ==============
 idInventory::Give
 If checkOnly is true, check only for possibility of adding to inventory, don't actually add
+
+
+@TODO: Enter point for pickups
+
 ==============
 */
 bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *statname, const char *value, int *idealWeapon, bool updateHud, bool dropped, bool checkOnly ) {
@@ -840,6 +868,25 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	if ( owner->IsFakeClient() ) {
 		return false;
 	}
+
+	//=====================
+	//	NO TIME 
+
+	//pickup check
+	if(checkOnly){
+		bombCount_current++;
+	//owner->hud->HandleNamedEvent("Test String\n");
+		gameLocal.Printf("Pickup current %d, max: %d\n", bombCount_current, nt_BOMBCOUNT_MAX);
+
+		if( bombCount_current >= nt_BOMBCOUNT_MAX ) {
+				bombCount_current = 0;
+				nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
+				gameLocal.Printf("DIFFUSED THE BOMB\n");
+		}
+	}
+
+	//=== end NO TIME ==================
+
 
 	if ( !idStr::Icmpn( statname, "ammo_", 5 ) ) {
 		i = AmmoIndexForAmmoClass( statname );
@@ -1790,6 +1837,14 @@ void idPlayer::Init( void ) {
 	
 	clientIdealWeaponPredictFrame = -1;
 	serverReceiveEvent = false;
+
+
+	//====================
+
+	//nt_startTime = gameLocal.time;// = gameLocal.time; //ms
+	nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;
+
+
 }
 
 /*
@@ -1869,6 +1924,10 @@ void idPlayer::Spawn( void ) {
 		overlayHudTime = 0;
 		
 		objectiveSystem = NULL;
+
+
+
+		//TOOD: Look in def files for HUD string literals
 
 		if ( spawnArgs.GetString( "hud", "", temp ) ) {
 			hud = uiManager->FindGui( temp, true, false, true );
@@ -2350,6 +2409,10 @@ void idPlayer::Save( idSaveGame *savefile ) const {
 	
 	// TOSAVE: const idDeclEntityDef*	cachedWeaponDefs [ MAX_WEAPONS ];	// cnicholson: Save these?
 	// TOSAVE: const idDeclEntityDef*	cachedPowerupDefs [ POWERUP_MAX ];
+
+
+
+	//TODO: More def file edits for hud string
 
 #ifndef _XENON
  	if ( hud ) {
@@ -3470,6 +3533,9 @@ void idPlayer::UpdateHudStats( idUserInterface *_hud ) {
 	int temp;
 	
 	assert ( _hud );
+
+	//notime
+	//_hud->SetStateString ( NULL, "Test string" );
 
 	temp = _hud->State().GetInt ( "player_health", "-1" );
 	if ( temp != health ) {		
@@ -9662,6 +9728,13 @@ void idPlayer::Think( void ) {
 		inBuyZone = false;
 
 	inBuyZonePrev = false;
+
+
+	if( gameLocal.time > nt_endTime ) {
+		gameLocal.Printf("	END OF TIMER \n");
+		Kill(5000, false);
+	}
+
 }
 
 /*
