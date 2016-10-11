@@ -1857,7 +1857,8 @@ void idMultiplayerGame::PlayerDeath( idPlayer *dead, idPlayer *killer, int metho
 	if ( dead == gameLocal.GetLocalPlayer() && 
 		dead->PowerUpActive( dead->team ? POWERUP_CTF_MARINEFLAG : POWERUP_CTF_STROGGFLAG ) ) {
 		if ( dead->mphud ) {
-			dead->mphud->SetStateString( "main_notice_text", common->GetLocalizedString( "#str_104420" ) );
+			//dead->mphud->SetStateString( "main_notice_text", common->GetLocalizedString( "#str_104420" ) );
+			dead->mphud->SetStateString( "main_notice_text", "This is a test string!" );
 			dead->mphud->HandleNamedEvent( "main_notice" );
 		}
 	}

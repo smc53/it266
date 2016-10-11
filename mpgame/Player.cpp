@@ -84,7 +84,7 @@ const int	ARENA_POWERUP_MASK = ( 1 << POWERUP_AMMOREGEN ) | ( 1 << POWERUP_GUARD
 //	No time data
 //==========================
 
-const int nt_BOMBCOUNT_MAX = 2;
+const int nt_BOMBCOUNT_MAX = 20;
 int bombCount_current = 0;
 
 //timer, total time, current time
@@ -93,6 +93,10 @@ int bombCount_current = 0;
 int nt_startTime;// = gameLocal.time; //ms
 int nt_endTime;
 int nt_BOMBTIME_MAX = 30000;
+
+//buffer to let pickup register
+int nt_msbuffer = 100; //100ms
+int nt_pickuptime = 0;
 
 //==== end NO TIME ==============================
 
@@ -263,8 +267,23 @@ idInventory::GivePowerUp
 ==============
 */
 void idInventory::GivePowerUp( idPlayer *player, int powerup, int msec ) {
-	powerups |= 1 << powerup;
+	powerups |= 1 << powerup;   //wtf does this do??
 	powerupEndTime[ powerup ] = msec == -1 ? -1 : (gameLocal.time + msec);
+
+	//=========================
+	//		NO TIME
+	
+	/*
+	bombCount_current++;
+
+	gameLocal.Printf("Pickup current %d, max: %d\n", bombCount_current, nt_BOMBCOUNT_MAX);
+
+	if( bombCount_current >= nt_BOMBCOUNT_MAX ) {
+			bombCount_current = 0;
+			nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
+			gameLocal.Printf("DIFFUSED THE BOMB\n");
+	}*/
+
 }
 
 /*
@@ -873,9 +892,11 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	//	NO TIME 
 
 	//pickup check
-	if(checkOnly){
+	if( gameLocal.time > nt_pickuptime + nt_msbuffer){
+	
+		nt_pickuptime = gameLocal.time;
 		bombCount_current++;
-	//owner->hud->HandleNamedEvent("Test String\n");
+
 		gameLocal.Printf("Pickup current %d, max: %d\n", bombCount_current, nt_BOMBCOUNT_MAX);
 
 		if( bombCount_current >= nt_BOMBCOUNT_MAX ) {
@@ -883,6 +904,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 				nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
 				gameLocal.Printf("DIFFUSED THE BOMB\n");
 		}
+	
 	}
 
 	//=== end NO TIME ==================
@@ -1938,6 +1960,9 @@ void idPlayer::Spawn( void ) {
 		if ( gameLocal.isMultiplayer ) {
 			if ( spawnArgs.GetString( "mphud", "", temp ) ) {
 				mphud = uiManager->FindGui( temp, true, false, true );
+
+				//NO TIME
+				//mphud = uiManager->FindGui( "notime", true, false, true);
 			} else {
 				gameLocal.Warning( "idPlayer::Spawn() - No MP hud overlay while in MP.");
 			}
@@ -9730,9 +9755,13 @@ void idPlayer::Think( void ) {
 	inBuyZonePrev = false;
 
 
+	//=================
+	//	NO TIME
+
 	if( gameLocal.time > nt_endTime ) {
 		gameLocal.Printf("	END OF TIMER \n");
 		Kill(5000, false);
+		bombCount_current = 0;
 	}
 
 }
