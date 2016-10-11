@@ -80,23 +80,7 @@ const int	MAX_INVENTORY_ITEMS = 20;
 const int	ARENA_POWERUP_MASK = ( 1 << POWERUP_AMMOREGEN ) | ( 1 << POWERUP_GUARD ) | ( 1 << POWERUP_DOUBLER ) | ( 1 << POWERUP_SCOUT );
 
 
-//===========================
-//	No time data
-//==========================
 
-const int nt_BOMBCOUNT_MAX = 20;
-int bombCount_current = 0;
-
-//timer, total time, current time
-
-//move this to player.init/restore
-int nt_startTime;// = gameLocal.time; //ms
-int nt_endTime;
-int nt_BOMBTIME_MAX = 30000;
-
-//buffer to let pickup register
-int nt_msbuffer = 100; //100ms
-int nt_pickuptime = 0;
 
 //==== end NO TIME ==============================
 
@@ -892,16 +876,16 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	//	NO TIME 
 
 	//pickup check
-	if( gameLocal.time > nt_pickuptime + nt_msbuffer){
+	if( gameLocal.time > owner->nt_pickuptime + owner->nt_msbuffer){
 	
-		nt_pickuptime = gameLocal.time;
-		bombCount_current++;
+		owner->nt_pickuptime = gameLocal.time;
+		owner->nt_bombCount_current++;
 
-		gameLocal.Printf("Pickup current %d, max: %d\n", bombCount_current, nt_BOMBCOUNT_MAX);
+		gameLocal.Printf("Pickup current %d, max: %d\n", owner->nt_bombCount_current, owner->nt_BOMBCOUNT_MAX);
 
-		if( bombCount_current >= nt_BOMBCOUNT_MAX ) {
-				bombCount_current = 0;
-				nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
+		if( owner->nt_bombCount_current >= owner->nt_BOMBCOUNT_MAX ) {
+				owner->nt_bombCount_current = 0;
+				owner->nt_endTime = gameLocal.time + owner->nt_BOMBTIME_MAX;		
 				gameLocal.Printf("DIFFUSED THE BOMB\n");
 		}
 	
@@ -1416,6 +1400,26 @@ idPlayer::idPlayer() {
 	prevOnGround = true;
 	clientIdealWeaponPredictFrame = -1;
 	serverReceiveEvent = false;
+
+	//===========================
+	//	No time data
+	//==========================
+
+	nt_BOMBCOUNT_MAX = 20;
+	nt_bombCount_current = 0;
+
+	//timer, total time, current time
+
+	//move this to player.init/restore
+	nt_startTime;// = gameLocal.time; //ms
+	nt_endTime;
+	nt_BOMBTIME_MAX = 30000;
+
+	//buffer to let pickup register
+	nt_msbuffer = 100; //100ms
+	nt_pickuptime = 0;
+
+
 }
 
 /*
@@ -9761,7 +9765,7 @@ void idPlayer::Think( void ) {
 	if( gameLocal.time > nt_endTime ) {
 		gameLocal.Printf("	END OF TIMER \n");
 		Kill(5000, false);
-		bombCount_current = 0;
+		nt_bombCount_current = 0;
 	}
 
 }

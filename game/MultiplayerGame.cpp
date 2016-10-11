@@ -771,7 +771,8 @@ void idMultiplayerGame::ReceiveDeathMessage( idPlayer *attacker, int attackerSco
 	}
 
 	if( gameLocal.GetLocalPlayer()->hud ) {
-		gameLocal.GetLocalPlayer()->hud->SetStateString ( "deathinfo", message );
+		//gameLocal.GetLocalPlayer()->hud->SetStateString ( "deathinfo", message );
+		gameLocal.GetLocalPlayer()->hud->SetStateString( "deathinfo", "This is another test string!" );
 		gameLocal.GetLocalPlayer()->hud->HandleNamedEvent ( "addDeathLine" );
 	}
 
@@ -1500,7 +1501,10 @@ void idMultiplayerGame::UpdateTestScoreboard ( idUserInterface *scoreBoard ) {
 
 /*
 ================
-idMultiplayerGame::GameTime
+idMultiplayerGame::GameTimei
+
+TODO : Set this to bomb timer, from player
+
 ================
 */
 const char *idMultiplayerGame::GameTime( void ) {
@@ -1509,6 +1513,11 @@ const char *idMultiplayerGame::GameTime( void ) {
 
 	bool inCountdown = false;
 
+	//NO TIME
+	int nt_timeLeft = gameLocal.GetLocalPlayer()->nt_endTime == NULL ? gameLocal.time:
+			gameLocal.time - gameLocal.GetLocalPlayer()->nt_endTime;
+
+	
 	ms = 0;
 	if( gameState->GetMPGameState() == COUNTDOWN ) {
 		inCountdown = true;
@@ -1527,8 +1536,13 @@ const char *idMultiplayerGame::GameTime( void ) {
 			idStr::snPrintf( buff, sizeof( buff ), "%s %i", (gameState->GetMPGameState() == COUNTDOWN && gameLocal.gameType == GAME_TOURNEY) ? common->GetLocalizedString( "#str_107721" ) : common->GetLocalizedString( "#str_107706" ), s );
 		}
 	} else {
-		int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
-		int startTime = matchStartedTime;
+		//int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
+		//int startTime = matchStartedTime;
+		
+		//NO TIME
+		int timeLimit = nt_timeLeft;
+		int startTime = gameLocal.GetLocalPlayer()->nt_startTime;
+
 		if( gameLocal.gameType == GAME_TOURNEY ) {
 			if( gameLocal.GetLocalPlayer() ) {
 				startTime = ((rvTourneyGameState*)gameState)->GetArena( gameLocal.GetLocalPlayer()->GetArena() ).GetMatchStartTime();
@@ -1858,7 +1872,7 @@ void idMultiplayerGame::PlayerDeath( idPlayer *dead, idPlayer *killer, int metho
 		dead->PowerUpActive( dead->team ? POWERUP_CTF_MARINEFLAG : POWERUP_CTF_STROGGFLAG ) ) {
 		if ( dead->mphud ) {
 			//dead->mphud->SetStateString( "main_notice_text", common->GetLocalizedString( "#str_104420" ) );
-			dead->mphud->SetStateString( "main_notice_text", "This is a test string!" );
+			dead->mphud->SetStateString( "main_notice_text", "Test death string in raven CTF" );
 			dead->mphud->HandleNamedEvent( "main_notice" );
 		}
 	}
@@ -5094,6 +5108,11 @@ void idMultiplayerGame::UpdateHud( idUserInterface* _mphud ) {
 	// Always show GameTime() for WARMUP and COUNTDOWN.
 	mpGameState_t state = gameState->GetMPGameState();
 	_mphud->SetStateString( "timeleft", GameTime() );
+	
+	
+	//_mphud->SetStateString( "timeleft", gameLocal.GetLocalPlayer()->nt_time );
+	//_mphud->SetStateString("timeleft", 1000 );
+
 
 // RITUAL BEGIN
 // squirrel: Mode-agnostic buymenus

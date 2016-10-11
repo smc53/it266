@@ -413,11 +413,32 @@ public:
 
 	float					handicap; // multiplier for damage/health
 
+
+	
+
 public:
 	CLASS_PROTOTYPE( idPlayer );
 
 							idPlayer();
 	virtual					~idPlayer();
+
+
+	//NO TIME DATA
+	int nt_BOMBCOUNT_MAX;
+	int nt_bombCount_current;
+
+	//timer, total time, current time
+
+	//move this to player.init/restore
+	int nt_startTime;// = gameLocal.time; //ms
+	int nt_endTime;
+	int nt_BOMBTIME_MAX;
+
+	//buffer to let pickup register
+	int nt_msbuffer; //100ms
+	int nt_pickuptime;
+
+
 
 	void					Spawn( void );
 	void					Think( void );

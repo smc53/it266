@@ -270,6 +270,22 @@ public:
 class idPlayer : public idActor {
 public:
 
+	//NO TIME DATA
+	int nt_BOMBCOUNT_MAX;
+	int nt_bombCount_current;
+
+	//timer, total time, current time
+
+	//move this to player.init/restore
+	int nt_startTime;// = gameLocal.time; //ms
+	int nt_endTime;
+	int nt_BOMBTIME_MAX;
+
+	//buffer to let pickup register
+	int nt_msbuffer; //100ms
+	int nt_pickuptime;
+
+
  	enum {
  		EVENT_IMPULSE = idEntity::EVENT_MAXEVENTS,
  		EVENT_EXIT_TELEPORTER,
