@@ -186,6 +186,9 @@ void rvGameState::GameStateChanged( void ) {
 	// Check for a currentState change
 	if( currentState != previousGameState->currentState ) {
 		if( currentState == WARMUP ) {
+			
+			currentState = GAMEON;
+			/*
 			if( gameLocal.gameType != GAME_TOURNEY ) {
 				player->GUIMainNotice( common->GetLocalizedString( "#str_107706" ), true );		
 			}
@@ -195,7 +198,9 @@ void rvGameState::GameStateChanged( void ) {
 			if( gameLocal.isClient ) {
 				statManager->Init();
 			}
-		} else if( currentState == COUNTDOWN ) {
+			*/
+		}
+		if( currentState == COUNTDOWN ) {
 			if( gameLocal.gameType != GAME_TOURNEY ) {
 				player->GUIMainNotice( common->GetLocalizedString( "#str_107706" ), true );		
 			}
@@ -212,12 +217,16 @@ void rvGameState::GameStateChanged( void ) {
 				gameLocal.mpGame.ScheduleAnnouncerSound( AS_GENERAL_ONE, nextStateTime - 1000 );
 			}
 		} else if( currentState == GAMEON ) {
+
+			player->GUIMainNotice( "%d BOMBS LEFT!\n", player->nt_BOMBCOUNT_MAX - player->nt_bombCount_current );
 			if ( !player->vsMsgState ) {
-				player->GUIMainNotice( "" );
+				//player->GUIMainNotice( "%d BOMBS LEFT!\n", player->nt_BOMBCOUNT_MAX - player->nt_bombCount_current );
 				player->GUIFragNotice( "" );
 			} else {
 				player->vsMsgState = false;
 			}
+
+			
 			if( gameLocal.gameType != GAME_TOURNEY ) {
 				gameLocal.mpGame.ScheduleAnnouncerSound( AS_GENERAL_FIGHT, gameLocal.time );
 			}

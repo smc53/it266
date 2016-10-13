@@ -80,7 +80,7 @@ const int	MAX_INVENTORY_ITEMS = 20;
 const int	ARENA_POWERUP_MASK = ( 1 << POWERUP_AMMOREGEN ) | ( 1 << POWERUP_GUARD ) | ( 1 << POWERUP_DOUBLER ) | ( 1 << POWERUP_SCOUT );
 
 
-
+bool nt_canPickup = true;
 
 //==== end NO TIME ==============================
 
@@ -876,7 +876,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	//	NO TIME 
 
 	//pickup check
-	if( gameLocal.time > owner->nt_pickuptime + owner->nt_msbuffer){
+	if( nt_canPickup &&  gameLocal.time > owner->nt_pickuptime + owner->nt_msbuffer){
 	
 		owner->nt_pickuptime = gameLocal.time;
 		owner->nt_bombCount_current++;
@@ -887,8 +887,13 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 				owner->nt_bombCount_current = 0;
 				owner->nt_endTime = gameLocal.time + owner->nt_BOMBTIME_MAX;		
 				gameLocal.Printf("DIFFUSED THE BOMB\n");
+				nt_canPickup = false;
 		}
 	
+	}
+
+	if( !nt_canPickup && gameLocal.time < owner->nt_endTime + 5000 ){
+			nt_canPickup = true;
 	}
 
 	//=== end NO TIME ==================
@@ -1026,6 +1031,10 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
  				}
   			}
 		}
+
+		//NO TIME - give 2 extra pickups for weapons
+		owner->nt_bombCount_current += 2;
+
 		return tookWeapon;
 	} else if ( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) ) {
 		// ignore these as they're handled elsewhere
@@ -3843,7 +3852,7 @@ void idPlayer::DrawShadow( renderEntity_t *headRenderEnt ) {
 	}
 }
 
-/*
+/*_mphud
 ===============
 idPlayer::DrawHUD
 ===============
@@ -4276,6 +4285,9 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 	}
 
 	if ( !idStr::Icmp( statname, "health" ) ) {
+
+		nt_bombCount_current--;
+
 		if ( health >= boundaryHealth ) {
 			return false;
 		}
@@ -4287,6 +4299,9 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
  			}
 		}
 	} else if ( !idStr::Icmp( statname, "bonushealth" ) ) {
+
+		nt_bombCount_current -= 2;
+
 		// allow health over max health
 		if ( health >= boundaryHealth * 2 ) {
 			return false;
@@ -9292,6 +9307,9 @@ void idPlayer::UpdateHud( void ) {
  	} else {
  		hud->SetStateString( "hudLag", "0" );
  	}
+
+	idStr nt_guistr = idStr::FormatNumber(nt_BOMBCOUNT_MAX - nt_bombCount_current) + " BOMBS LEFT!";
+	GUIMainNotice( nt_guistr ,  true);
 }
 
 /*

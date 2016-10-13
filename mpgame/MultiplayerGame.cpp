@@ -1053,7 +1053,8 @@ void idMultiplayerGame::UpdateDMScoreboard( idUserInterface *scoreBoard ) {
 
 	scoreBoard->SetStateString( "timeleft", GameTime() );
 
-	scoreBoard->SetStateBool( "infinity", ( !timeLimit && state != COUNTDOWN ) || inNonTimedState );
+	//scoreBoard->SetStateBool( "infinity", ( !timeLimit && state != COUNTDOWN ) || inNonTimedState );
+	scoreBoard->SetStateBool( "infinity", false );
 
 	scoreBoard->StateChanged ( gameLocal.time );
 	scoreBoard->Redraw( gameLocal.time );
@@ -1239,7 +1240,9 @@ void idMultiplayerGame::UpdateTeamScoreboard( idUserInterface *scoreBoard ) {
 
 	int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
 	mpGameState_t state = gameState->GetMPGameState();
-	scoreBoard->SetStateBool( "infinity", ( !timeLimit && state != COUNTDOWN ) || state == WARMUP || state == GAMEREVIEW || state == SUDDENDEATH );
+	//scoreBoard->SetStateBool( "infinity", ( !timeLimit && state != COUNTDOWN ) || state == WARMUP || state == GAMEREVIEW || state == SUDDENDEATH );
+	scoreBoard->SetStateBool( "infinity", false);
+
 
 	scoreBoard->StateChanged( gameLocal.time );
 	scoreBoard->Redraw( gameLocal.time );
@@ -1534,18 +1537,34 @@ const char *idMultiplayerGame::GameTime( void ) {
 			idStr::snPrintf( buff, sizeof( buff ), "%s %i", (gameState->GetMPGameState() == COUNTDOWN && gameLocal.gameType == GAME_TOURNEY) ? common->GetLocalizedString( "#str_107721" ) : common->GetLocalizedString( "#str_107706" ), s );
 		}
 	} else {
-		int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
-		int startTime = matchStartedTime;
+
+		
+		//NO TIME
+		//int timeLimit = gameLocal.GetLocalPlayer()->nt_endTime - gameLocal.time;
+		int timeLimit = gameLocal.GetLocalPlayer()->nt_BOMBTIME_MAX;
+		int startTime = gameLocal.GetLocalPlayer()->nt_startTime;
+		
+		//int timeLimit = gameLocal.serverInfo.GetInt( "si_timeLimit" );
+		//int startTime = matchStartedTime;
+
+
+		/*
 		if( gameLocal.gameType == GAME_TOURNEY ) {
 			if( gameLocal.GetLocalPlayer() ) {
 				startTime = ((rvTourneyGameState*)gameState)->GetArena( gameLocal.GetLocalPlayer()->GetArena() ).GetMatchStartTime();
 			}
 		}
+		*/
+
+		/*
 		if ( timeLimit ) {
 			ms = ( timeLimit * 60000 ) - ( gameLocal.time - startTime );
 		} else {
 			ms = gameLocal.time - startTime;
 		}
+		*/
+
+		ms = gameLocal.GetLocalPlayer()->nt_endTime - gameLocal.time;
 		if ( ms < 0 ) {
 			ms = 0;
 		}
@@ -3564,9 +3583,11 @@ idMultiplayerGame::UpdateMainGui
 */
 void idMultiplayerGame::UpdateMainGui( void ) {
 	int i;
+	//gameState->SetNextMPGameState( GAMEON );
 	mainGui->SetStateInt( "readyon", gameState->GetMPGameState() == WARMUP ? 1 : 0 );
 	mainGui->SetStateInt( "readyoff", gameState->GetMPGameState() != WARMUP ? 1 : 0 );
 	idStr strReady = cvarSystem->GetCVarString( "ui_ready" );
+	
 	if ( strReady.Icmp( "ready") == 0 ){
 		strReady = common->GetLocalizedString( "#str_104248" );
 	} else {
@@ -5203,7 +5224,9 @@ void idMultiplayerGame::UpdateHud( idUserInterface* _mphud ) {
 		inNonTimedState |= (((rvTourneyGameState*)gameState)->GetArena( localPlayer->GetArena() ).GetState() == AS_SUDDEN_DEATH);
 		inCountdownState |= (((rvTourneyGameState*)gameState)->GetArena( localPlayer->GetArena() ).GetState() == AS_WARMUP);
 	}
-	_mphud->SetStateBool( "infinity", ( !timeLimit && !inCountdownState ) || inNonTimedState );
+	//_mphud->SetStateBool( "infinity", ( !timeLimit && !inCountdownState ) || inNonTimedState );
+	_mphud->SetStateBool("infinity", false);
+
 
 	if( gameLocal.gameType == GAME_DM ) {
 		if( rankedPlayers.Num() ) {
@@ -6829,7 +6852,7 @@ void idMultiplayerGame::CheckAbortGame( void ) {
 	// warmup to re-seed
 	if( gameLocal.gameType == GAME_TOURNEY ) {
 		if ( !EnoughClientsToPlay() ) {
-			gameState->NewState( WARMUP );
+			//gameState->NewState( WARMUP );
 		}
 	} else {
 		if ( !EnoughClientsToPlay() && TimeLimitHit() ) {
@@ -6918,8 +6941,13 @@ void idMultiplayerGame::MapRestart( void ) {
 	ClearAnnouncerSounds();
 
 	assert( !gameLocal.isClient );
+
+	/*
 	if ( gameLocal.GameState() != GAMESTATE_SHUTDOWN && gameState->GetMPGameState() != WARMUP ) {
 		gameState->NewState( WARMUP );
+
+		//gameState->NewState( GAMEON );
+
 		// force an immediate state detection/update, otherwise if we update our state this
 		// same frame we'll miss transitions
 		gameState->SendState( serverReliableSender.To( -1 ) );
@@ -6928,7 +6956,7 @@ void idMultiplayerGame::MapRestart( void ) {
 		gameState->SetNextMPGameStateTime( 0 );
 		
 	}
-
+	*/
 	// mekberg: moved this before the updateUI just in case these values weren't reset.
 	for ( int i = 0; i < TEAM_MAX; i++ ) {
 		teamScore[ i ] = 0;
