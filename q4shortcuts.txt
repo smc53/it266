@@ -1,0 +1,3 @@
+QUAKE 4 SHORTCUTS
+
+"QUAKE PATH" +disconnect +set fs_game notime 
