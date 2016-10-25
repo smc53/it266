@@ -878,17 +878,14 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 	//pickup check
 	if( nt_canPickup &&  gameLocal.time > owner->nt_pickuptime + owner->nt_msbuffer){
 	
+		//increment bomb count
 		owner->nt_pickuptime = gameLocal.time;
 		owner->nt_bombCount_current++;
 
 		gameLocal.Printf("Pickup current %d, max: %d\n", owner->nt_bombCount_current, owner->nt_BOMBCOUNT_MAX);
 
-		if( owner->nt_bombCount_current >= owner->nt_BOMBCOUNT_MAX ) {
-				owner->nt_bombCount_current = 0;
-				owner->nt_endTime = gameLocal.time + owner->nt_BOMBTIME_MAX;		
-				gameLocal.Printf("DIFFUSED THE BOMB\n");
-				nt_canPickup = false;
-		}
+		//reset bomb count
+		
 	
 	}
 
@@ -9414,6 +9411,15 @@ Called every tic for each player
 */
 void idPlayer::Think( void ) {
 	renderEntity_t *headRenderEnt;
+
+	//TODO: move this to accomodate other incrementors
+		if( nt_bombCount_current >= nt_BOMBCOUNT_MAX ) {
+				nt_bombCount_current = 0;
+				nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
+				gameLocal.Printf("DIFFUSED THE BOMB\n");
+				nt_canPickup = false;
+		}
+
 
 	if ( talkingNPC ) {
 		if ( !talkingNPC.IsValid() ) {
