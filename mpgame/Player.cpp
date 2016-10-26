@@ -881,6 +881,8 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 		//increment bomb count
 		owner->nt_pickuptime = gameLocal.time;
 		owner->nt_bombCount_current++;
+		owner->GUIMainNotice( "-1 BOMB" ,  false);
+
 
 		gameLocal.Printf("Pickup current %d, max: %d\n", owner->nt_bombCount_current, owner->nt_BOMBCOUNT_MAX);
 
@@ -1031,6 +1033,7 @@ bool idInventory::Give( idPlayer *owner, const idDict &spawnArgs, const char *st
 
 		//NO TIME - give 2 extra pickups for weapons
 		owner->nt_bombCount_current += 2;
+		owner->GUIMainNotice( "-2 BOMB" ,  false);
 
 		return tookWeapon;
 	} else if ( !idStr::Icmp( statname, "item" ) || !idStr::Icmp( statname, "icon" ) || !idStr::Icmp( statname, "name" ) ) {
@@ -1871,12 +1874,86 @@ void idPlayer::Init( void ) {
 	serverReceiveEvent = false;
 
 
+	//===========================================
+
+	//	NO TIME
+
 	//====================
 
 	//nt_startTime = gameLocal.time;// = gameLocal.time; //ms
 	nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;
+	
+	idEntity *ent;
+	idProjectile *nt_bomb_item;
+	const idDeclEntityDef *nt_item_def;
+	nt_item_def = gameLocal.FindEntityDef("projectile_grenade");
+	//idDict &nt_item = gameLocal.FindEntityDefDict( "projectile_rocket", false );
+	
+
+	// If a projectile entity has already been created then use that one, otherwise
+		// spawn a new one based on the given dictionary
+		/*if ( projectileEnt ) {
+			ent = projectileEnt;
+			ent->Show();
+			ent->Unbind();
+			projectileEnt = NULL;
+		} else {*/
 
 
+			//nt_item_def->dict.SetInt( "instance", GetInstance() );
+			gameLocal.SpawnEntityDef( nt_item_def->dict , &ent, false );
+
+
+		//}
+
+		// Make sure it spawned
+		if ( !ent ) {
+			gameLocal.Error( "failed to this test case '%s'", weaponDef->GetName ( ) );
+		}
+		
+		assert ( ent->IsType( idProjectile::GetClassType() ) );
+
+		// Create the projectile
+		nt_bomb_item = static_cast<idProjectile*>(ent);
+		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer()->GetPhysics()->GetOrigin(), *(new idVec3()), NULL, gameLocal.GetLocalPlayer()->extraProjPassEntity );
+
+		idBounds projBounds;
+		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
+
+		// make sure the projectile starts inside the bounding box of the owner
+		/*
+		if ( i == 0 ) {
+			idVec3  start;
+			float   distance;
+			trace_t	tr;
+//RAVEN BEGIN
+//asalmon: xbox must use muzzle Axis for aim assistance
+#ifdef _XBOX
+			muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
+			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, muzzleAxis[0], distance ) ) {
+				start = muzzle_pos + distance * muzzleAxis[0];
+			} 
+#else
+			muzzle_pos = muzzleOrigin + playerViewAxis[ 0 ] * 2.0f;
+			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, playerViewAxis[0], distance ) ) {
+				start = muzzle_pos + distance * playerViewAxis[0];
+			} 
+#endif
+			else {
+				start = ownerBounds.GetCenter();
+			}
+			gameLocal.Translation( owner, tr, start, muzzle_pos, proj->GetPhysics()->GetClipModel(), proj->GetPhysics()->GetClipModel()->GetAxis(), MASK_SHOT_RENDERMODEL, owner );
+
+			muzzle_pos = tr.endpos;
+		}
+		*/
+	
+		gameLocal.Printf("Spawned a projectile\n");
+		int nt_x = nt_bomb_item->GetPhysics()->GetOrigin().x;
+		int nt_y = nt_bomb_item->GetPhysics()->GetOrigin().y;
+		int nt_z = nt_bomb_item->GetPhysics()->GetOrigin().z;
+
+		gameLocal.Printf("COORDS : %d %d %d \n", nt_x, nt_y, nt_z);
 }
 
 /*
@@ -4284,6 +4361,9 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 	if ( !idStr::Icmp( statname, "health" ) ) {
 
 		nt_bombCount_current--;
+
+		//SLOW DOWN
+		GivePowerUp( 1, 5 );
 
 		if ( health >= boundaryHealth ) {
 			return false;
@@ -9417,6 +9497,7 @@ void idPlayer::Think( void ) {
 				nt_bombCount_current = 0;
 				nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;		
 				gameLocal.Printf("DIFFUSED THE BOMB\n");
+				GUIMainNotice( "BOMB DIFFUSED!" ,  false);
 				nt_canPickup = false;
 		}
 
@@ -9790,6 +9871,7 @@ void idPlayer::Think( void ) {
 		gameLocal.Printf("	END OF TIMER \n");
 		Kill(5000, false);
 		nt_bombCount_current = 0;
+		GUIMainNotice( "WHY SO SLOW???" ,  false);
 	}
 
 }
@@ -14284,3 +14366,4 @@ bool idPlayer::IsSpectatedClient( void ) const {
 	}
 	return false;
 }
+

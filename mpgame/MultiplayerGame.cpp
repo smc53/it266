@@ -3210,6 +3210,9 @@ void idMultiplayerGame::CommonRun( void ) {
 			if( !ent || !ent->IsType( idItem::GetClassType() ) || ent->IsType( rvItemCTFFlag::GetClassType() ) ) {
 				continue;
 			}
+
+			//NOTIME
+			//TODO: look here for entity spawning
 			
 			idItem* item = (idItem*)ent;
 

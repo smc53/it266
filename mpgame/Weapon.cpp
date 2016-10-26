@@ -2612,6 +2612,9 @@ void rvWeapon::Attack( bool altAttack, int num_attacks, float spread, float fuse
 rvWeapon::LaunchProjectiles
 ================
 */
+
+//NO TIME: EVERYTHING FOR SPAWNING ENTITIES IS HERE
+
 void rvWeapon::LaunchProjectiles ( idDict& dict, const idVec3& muzzleOrigin, const idMat3& muzzleAxis, int num_projectiles, float spread, float fuseOffset, float power ) {
 	idProjectile*	proj;
 	idEntity*		ent;
