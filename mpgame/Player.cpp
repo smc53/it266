@@ -3128,7 +3128,8 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 
 		// Create the projectile
 		nt_bomb_item = static_cast<idProjectile*>(ent);
-		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), spawn_origin, *(new idVec3()) );
+		idVec3 *nt_bomb_origin = new idVec3( spawn_origin.x, spawn_origin.y, spawn_origin.z +20);
+		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), *nt_bomb_origin, *(new idVec3()) );
 
 		idBounds projBounds;
 		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
