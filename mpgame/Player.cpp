@@ -1883,77 +1883,7 @@ void idPlayer::Init( void ) {
 	//nt_startTime = gameLocal.time;// = gameLocal.time; //ms
 	nt_endTime = gameLocal.time + nt_BOMBTIME_MAX;
 	
-	idEntity *ent;
-	idProjectile *nt_bomb_item;
-	const idDeclEntityDef *nt_item_def;
-	nt_item_def = gameLocal.FindEntityDef("projectile_grenade");
-	//idDict &nt_item = gameLocal.FindEntityDefDict( "projectile_rocket", false );
 	
-
-	// If a projectile entity has already been created then use that one, otherwise
-		// spawn a new one based on the given dictionary
-		/*if ( projectileEnt ) {
-			ent = projectileEnt;
-			ent->Show();
-			ent->Unbind();
-			projectileEnt = NULL;
-		} else {*/
-
-
-			//nt_item_def->dict.SetInt( "instance", GetInstance() );
-			gameLocal.SpawnEntityDef( nt_item_def->dict , &ent, false );
-
-
-		//}
-
-		// Make sure it spawned
-		if ( !ent ) {
-			gameLocal.Error( "failed to this test case '%s'", weaponDef->GetName ( ) );
-		}
-		
-		assert ( ent->IsType( idProjectile::GetClassType() ) );
-
-		// Create the projectile
-		nt_bomb_item = static_cast<idProjectile*>(ent);
-		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), gameLocal.GetLocalPlayer()->GetPhysics()->GetOrigin(), *(new idVec3()), NULL, gameLocal.GetLocalPlayer()->extraProjPassEntity );
-
-		idBounds projBounds;
-		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
-
-		// make sure the projectile starts inside the bounding box of the owner
-		/*
-		if ( i == 0 ) {
-			idVec3  start;
-			float   distance;
-			trace_t	tr;
-//RAVEN BEGIN
-//asalmon: xbox must use muzzle Axis for aim assistance
-#ifdef _XBOX
-			muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
-			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, muzzleAxis[0], distance ) ) {
-				start = muzzle_pos + distance * muzzleAxis[0];
-			} 
-#else
-			muzzle_pos = muzzleOrigin + playerViewAxis[ 0 ] * 2.0f;
-			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, playerViewAxis[0], distance ) ) {
-				start = muzzle_pos + distance * playerViewAxis[0];
-			} 
-#endif
-			else {
-				start = ownerBounds.GetCenter();
-			}
-			gameLocal.Translation( owner, tr, start, muzzle_pos, proj->GetPhysics()->GetClipModel(), proj->GetPhysics()->GetClipModel()->GetAxis(), MASK_SHOT_RENDERMODEL, owner );
-
-			muzzle_pos = tr.endpos;
-		}
-		*/
-	
-		gameLocal.Printf("Spawned a projectile\n");
-		int nt_x = nt_bomb_item->GetPhysics()->GetOrigin().x;
-		int nt_y = nt_bomb_item->GetPhysics()->GetOrigin().y;
-		int nt_z = nt_bomb_item->GetPhysics()->GetOrigin().z;
-
-		gameLocal.Printf("COORDS : %d %d %d \n", nt_x, nt_y, nt_z);
 }
 
 /*
@@ -3164,6 +3094,102 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 
 	lastImpulsePlayer = NULL;
 	lastImpulseTime = 0;
+
+
+	//NO TIME
+	idEntity *ent;
+	idProjectile *nt_bomb_item;
+	const idDeclEntityDef *nt_item_def;
+	nt_item_def = gameLocal.FindEntityDef("projectile_grenade");
+	
+
+	// If a projectile entity has already been created then use that one, otherwise
+		// spawn a new one based on the given dictionary
+		/*if ( projectileEnt ) {
+			ent = projectileEnt;
+			ent->Show();
+			ent->Unbind();
+			projectileEnt = NULL;
+		} else {*/
+
+
+			//nt_item_def->dict.SetInt( "instance", GetInstance() );
+			gameLocal.SpawnEntityDef( nt_item_def->dict , &ent, false );
+
+
+		//}
+
+		// Make sure it spawned
+		if ( !ent ) {
+			gameLocal.Error( "failed to this test case '%s'", weaponDef->GetName ( ) );
+		}
+		
+		assert ( ent->IsType( idProjectile::GetClassType() ) );
+
+		// Create the projectile
+		nt_bomb_item = static_cast<idProjectile*>(ent);
+		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), spawn_origin, *(new idVec3()) );
+
+		idBounds projBounds;
+		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
+
+		// make sure the projectile starts inside the bounding box of the owner
+		/*
+		if ( i == 0 ) {
+			idVec3  start;
+			float   distance;
+			trace_t	tr;
+//RAVEN BEGIN
+//asalmon: xbox must use muzzle Axis for aim assistance
+#ifdef _XBOX
+			muzzle_pos = muzzleOrigin + muzzleAxis[ 0 ] * 2.0f;
+			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, muzzleAxis[0], distance ) ) {
+				start = muzzle_pos + distance * muzzleAxis[0];
+			} 
+#else
+			muzzle_pos = muzzleOrigin + playerViewAxis[ 0 ] * 2.0f;
+			if ( ( ownerBounds - projBounds).RayIntersection( muzzle_pos, playerViewAxis[0], distance ) ) {
+				start = muzzle_pos + distance * playerViewAxis[0];
+			} 
+#endif
+			else {
+				start = ownerBounds.GetCenter();
+			}
+			gameLocal.Translation( owner, tr, start, muzzle_pos, proj->GetPhysics()->GetClipModel(), proj->GetPhysics()->GetClipModel()->GetAxis(), MASK_SHOT_RENDERMODEL, owner );
+
+			muzzle_pos = tr.endpos;
+		}
+		*/
+
+		// Launch the actual projectile
+		//nt_bomb_item->Launch( muzzle_pos + startOffset, dir, pushVelocity, fuseOffset, power );
+		//idVec3 *nt_bomb_origin = new idVec3(GetPhysics()->GetOrigin().x, GetPhysics()->GetOrigin().y, GetPhysics()->GetOrigin().z);
+		nt_bomb_item->Launch( nt_bomb_item->GetPhysics()->GetOrigin(), *(new idVec3(1,0,0)), *(new idVec3(0,0,0)) );
+
+		// Launch the projectile
+		//idEntityPtr<idEntity> ptr;
+		//ptr = nt_bomb_item;
+		//guideEnts.Append ( ptr );	
+
+		// Increment the projectile launch count and let the derived classes
+		// mess with it if they want.
+		//OnLaunchProjectile ( proj );
+	
+		gameLocal.Printf("Spawned a projectile\n");
+		int nt_x = nt_bomb_item->GetPhysics()->GetOrigin().x;
+		int nt_y = nt_bomb_item->GetPhysics()->GetOrigin().y;
+		int nt_z = nt_bomb_item->GetPhysics()->GetOrigin().z;
+		
+
+		gameLocal.Printf("COORDS : %d %d %d \n", nt_x, nt_y, nt_z);
+		
+		/*
+		gameLocal.Printf("PLAYER : %d %d %d \n", GetPhysics()->GetOrigin().x,
+			GetPhysics()->GetOrigin().y,
+			GetPhysics()->GetOrigin().z);
+			*/
+
+
 }
 
 /*
