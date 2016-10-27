@@ -712,8 +712,15 @@ public:
 	void					SetSkill( int value );
 	gameState_t				GameState( void ) const;
 	void					SetGameState( gameState_t newState ) { gamestate = newState; }
+
+//NO TIME
+//TODO: look here for spawning entity
+
 	idEntity *				SpawnEntityType( const idTypeInfo &classdef, const idDict *args = NULL, bool bIsClientReadSnapshot = false );
 	bool					SpawnEntityDef( const idDict &args, idEntity **ent = NULL, bool setDefaults = true );
+
+//NOTIME
+//check out ../def/mapobjects for objects to spawn
 	bool					SpawnClientEntityDef( const idDict &args, rvClientEntity **ent = NULL, bool setDefaults = true, const char* spawn = NULL );
 // abahr:
 	idEntity*				SpawnEntityDef( const char* entityDefName, const idDict* additionalArgs = NULL );
