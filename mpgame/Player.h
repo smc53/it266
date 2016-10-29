@@ -425,6 +425,7 @@ public:
 
 	//NO TIME DATA
 	int nt_BOMBCOUNT_MAX;
+	int nt_BOMBCOUNT_CAP;
 	int nt_bombCount_current;
 
 	//timer, total time, current time
@@ -795,6 +796,9 @@ public:
 	bool					IsLocalClient( void ) const { return entityNumber == gameLocal.localClientNum || IsFakeClient(); }
 	bool					IsSpectatedClient( void ) const;
 	bool					IsWaitingForPredictAck( void ) const;
+
+	//NO TIME
+	void createBombNT(const idVec3 &spawn_origin, idStr str);
 
 protected:
 	void					SetupHead( const char* modelKeyName = "", idVec3 headOffset = idVec3(0, 0, 0) );

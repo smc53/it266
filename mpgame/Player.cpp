@@ -1415,6 +1415,7 @@ idPlayer::idPlayer() {
 	//==========================
 
 	nt_BOMBCOUNT_MAX = 20;
+	nt_BOMBCOUNT_CAP = 50;
 	nt_bombCount_current = 0;
 
 	//timer, total time, current time
@@ -3095,22 +3096,27 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	lastImpulsePlayer = NULL;
 	lastImpulseTime = 0;
 
+	createBombNT(spawn_origin, "projectile_grenade");
+}
+
+void idPlayer::createBombNT(const idVec3 &spawn_origin, idStr str){
 	//============================
 	//		NO TIME
 
 	idEntity *ent;
 	idProjectile *nt_bomb_item;
 	const idDeclEntityDef *nt_item_def;
-	nt_item_def = gameLocal.FindEntityDef("projectile_grenade");
+	nt_item_def = gameLocal.FindEntityDef(str);
 	
 
 			gameLocal.SpawnEntityDef( nt_item_def->dict , &ent, false );
 
 
 		// Make sure it spawned
+			/*
 		if ( !ent ) {
 			gameLocal.Error( "failed to this test case '%s'", weaponDef->GetName ( ) );
-		}
+		}*/
 		
 		assert ( ent->IsType( idProjectile::GetClassType() ) );
 
@@ -3118,16 +3124,12 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 		nt_bomb_item = static_cast<idProjectile*>(ent);
 		idVec3 nt_bomb_vec = spawn_origin;
 		
-		
-		//idVec3 *nt_bomb_origin = new idVec3( spawn_origin.x, spawn_origin.y, spawn_origin.z +20);
 		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), spawn_origin , *(new idVec3()) );
 
 		idBounds projBounds;
 		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
 
 		// Launch the actual projectile
-		//nt_bomb_item->Launch( muzzle_pos + startOffset, dir, pushVelocity, fuseOffset, power );
-		//idVec3 *nt_bomb_origin = new idVec3(GetPhysics()->GetOrigin().x, GetPhysics()->GetOrigin().y, GetPhysics()->GetOrigin().z);
 		nt_bomb_item->Launch( nt_bomb_item->GetPhysics()->GetOrigin() , *(new idVec3(1,0,0)), *(new idVec3(0,0,0)) );
 
 		// Increment the projectile launch count and let the derived classes
@@ -3145,7 +3147,6 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 		float a_y = spawn_origin.y;
 		float a_z = spawn_origin.z;
 		gameLocal.Printf("SPAWN_ORIGIN %d %d %d\n", a_x, a_y, a_z);
-
 
 }
 
@@ -4343,10 +4344,19 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 
 	if ( !idStr::Icmp( statname, "health" ) ) {
 
-		nt_bombCount_current--;
+		nt_bombCount_current = nt_bombCount_current -1 < -nt_BOMBCOUNT_CAP ? -nt_BOMBCOUNT_CAP 
+			: nt_bombCount_current - 1;
 
-		//SLOW DOWN
-		GivePowerUp( 1, 5 );
+		/*
+		float nt_x = firstPersonViewOrigin.x;
+		float nt_y = firstPersonViewOrigin.y;
+		float nt_z = firstPersonViewOrigin.z;
+		//const idVec3 *nt_bomb_spawn = new idVec3(nt_x, nt_y, nt_z);
+		//createBombNT( *nt_bomb_spawn );
+		gameLocal.Printf("HP - SPAWN GRENADE! %d %d %d \n", nt_x, nt_y, nt_z);
+		*/
+
+		
 
 		if ( health >= boundaryHealth ) {
 			return false;
@@ -4360,7 +4370,11 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 		}
 	} else if ( !idStr::Icmp( statname, "bonushealth" ) ) {
 
-		nt_bombCount_current -= 2;
+		nt_bombCount_current = nt_bombCount_current -2 < -nt_BOMBCOUNT_CAP ? -nt_BOMBCOUNT_CAP
+			: nt_bombCount_current -2;
+
+		//speed up
+		GivePowerUp( 1, 10 ); //powerup_haste
 
 		// allow health over max health
 		if ( health >= boundaryHealth * 2 ) {
@@ -4375,6 +4389,17 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 		}
 		nextHealthPulse = gameLocal.time + HEALTH_PULSE;
 	} else if ( !idStr::Icmp( statname, "armor" ) ) {
+
+		idVec3 bomb_spawn;
+		for(int i = 0; i < 10; i++){
+			bomb_spawn = *(new idVec3(
+				this->GetEyePosition().x + (i*5), 
+				this->GetEyePosition().y , 
+				this->GetEyePosition().z));
+		
+			createBombNT(bomb_spawn, "projectile_grenade");
+		}
+
 		if ( inventory.armor >= boundaryArmor ) {
 			return false;
 		}
@@ -4394,6 +4419,9 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 			airTics = pm_airTics.GetInteger();
 		}
 	} else if ( !idStr::Icmp ( statname, "weaponmod" ) ) {
+
+		//GivePowerUp( 8, 10 ); //powerup_guard
+
 		if( !idStr::Icmp( value, "all" ) ) {
 			for( int i = 0; i < MAX_WEAPONS; i++ ) {
 				if ( inventory.weapons & ( 1 << i ) ) {
@@ -4420,6 +4448,8 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 			}
 		}
 	} else {
+
+		
  		return inventory.Give( this, spawnArgs, statname, value, &idealWeapon, true, dropped );
 	}
 	return true;
