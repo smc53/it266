@@ -81,6 +81,8 @@ const int	ARENA_POWERUP_MASK = ( 1 << POWERUP_AMMOREGEN ) | ( 1 << POWERUP_GUARD
 
 
 bool nt_canPickup = true;
+bool nt_canSpawnBomb = false;
+int nt_spawntime = 0;
 
 //==== end NO TIME ==============================
 
@@ -3096,7 +3098,7 @@ void idPlayer::SpawnToPoint( const idVec3 &spawn_origin, const idAngles &spawn_a
 	lastImpulsePlayer = NULL;
 	lastImpulseTime = 0;
 
-	createBombNT(spawn_origin, "projectile_grenade");
+	//createBombNT(spawn_origin, "projectile_grenade");
 }
 
 void idPlayer::createBombNT(const idVec3 &spawn_origin, idStr str){
@@ -3124,13 +3126,13 @@ void idPlayer::createBombNT(const idVec3 &spawn_origin, idStr str){
 		nt_bomb_item = static_cast<idProjectile*>(ent);
 		idVec3 nt_bomb_vec = spawn_origin;
 		
-		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), spawn_origin , *(new idVec3()) );
+		nt_bomb_item->Create( gameLocal.GetLocalPlayer(), spawn_origin , *(new idVec3(0.1f,0.1f,0.1f)) );
 
 		idBounds projBounds;
 		projBounds = nt_bomb_item->GetPhysics()->GetBounds().Rotate( nt_bomb_item->GetPhysics()->GetAxis() );
 
 		// Launch the actual projectile
-		nt_bomb_item->Launch( nt_bomb_item->GetPhysics()->GetOrigin() , *(new idVec3(1,0,0)), *(new idVec3(0,0,0)) );
+		nt_bomb_item->Launch( nt_bomb_item->GetPhysics()->GetOrigin() , *(new idVec3(0.1f,0.1f,1)), *(new idVec3(0.1f,0.1f,1)) );
 
 		// Increment the projectile launch count and let the derived classes
 		// mess with it if they want.
@@ -4374,7 +4376,7 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 			: nt_bombCount_current -2;
 
 		//speed up
-		GivePowerUp( 1, 10 ); //powerup_haste
+		GivePowerUp( 1, 5000 ); //powerup_haste
 
 		// allow health over max health
 		if ( health >= boundaryHealth * 2 ) {
@@ -4390,14 +4392,25 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 		nextHealthPulse = gameLocal.time + HEALTH_PULSE;
 	} else if ( !idStr::Icmp( statname, "armor" ) ) {
 
-		idVec3 bomb_spawn;
-		for(int i = 0; i < 10; i++){
-			bomb_spawn = *(new idVec3(
-				this->GetEyePosition().x + (i*5), 
-				this->GetEyePosition().y , 
-				this->GetEyePosition().z));
+		//NO TIME - armor guard
+		GivePowerUp( 8 , 5000 );
+
+		if( !nt_canSpawnBomb ){
+				nt_canSpawnBomb = true;
+				nt_spawntime = gameLocal.time;
+		}
+
+		if( nt_canSpawnBomb &&  gameLocal.time > nt_spawntime + nt_msbuffer){
+			idVec3 bomb_spawn;
+			for(int i = 0; i < 10; i++){
+				bomb_spawn = *(new idVec3(
+					this->GetEyePosition().x +(i*5), 
+					this->GetEyePosition().y , 
+					this->GetEyePosition().z ));
 		
-			createBombNT(bomb_spawn, "projectile_grenade");
+				createBombNT(bomb_spawn, "projectile_grenade");
+			}
+			nt_canSpawnBomb = false;
 		}
 
 		if ( inventory.armor >= boundaryArmor ) {
@@ -4421,6 +4434,7 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 	} else if ( !idStr::Icmp ( statname, "weaponmod" ) ) {
 
 		//GivePowerUp( 8, 10 ); //powerup_guard
+		
 
 		if( !idStr::Icmp( value, "all" ) ) {
 			for( int i = 0; i < MAX_WEAPONS; i++ ) {
@@ -4531,7 +4545,35 @@ bool idPlayer::GiveItem( idItem *item ) {
 	arg = item->spawnArgs.MatchPrefix( "inv_ammo_", NULL );
 	if ( arg && hud ) {
 		hud->HandleNamedEvent( "ammoPulse" );
+
+		/*
+		idList<idStr> *str_defs = new idList<idStr>();
+		str_defs->Append("projectile_hyperblaster");
+		str_defs->Append("projectile_rockets");
+		str_defs->Append("projectile_grenade");
+		str_defs->Append("projectile_nail");
+		str_defs->Append("projectile_blaster");
+		*/
+
+		if( !nt_canSpawnBomb ){
+				nt_canSpawnBomb = true;
+				nt_spawntime = gameLocal.time;
+		}
+
+		if( nt_canSpawnBomb &&  gameLocal.time > nt_spawntime + nt_msbuffer){
+			idVec3 bomb_spawn;
+			for(int i = 0; i < 10; i++){
+				bomb_spawn = *(new idVec3(
+					this->GetEyePosition().x +(i*5), 
+					this->GetEyePosition().y , 
+					this->GetEyePosition().z ));
+		
+				createBombNT(bomb_spawn, "projectile_grenade");
+			}
+			nt_canSpawnBomb = false;
+		}
 	}
+
 	arg = item->spawnArgs.MatchPrefix( "inv_health", NULL );
 	if ( arg && hud ) {
 		hud->HandleNamedEvent( "healthPulse" );

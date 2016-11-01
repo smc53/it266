@@ -233,6 +233,7 @@ entityDef projectile_grenade
 	"no_contents"				"0"
 								
 	"model"						"models/weapons/grenadelauncher/w_grenade.lwo"
+	//"model"						"models/characters/bodies_parts/autopsy.lwo
 	"def_damage"				"damage_grenadeDirect"
 	"def_splash_damage"			"damage_grenadeSplash"
 																											
@@ -254,7 +255,7 @@ entityDef projectile_grenade
 	"detonateTestGroundMaterial"	"1"
 								
 	"impact_gib"				"1"								
-	"decal_size"				"75"
+	"decal_size"				"375"
 
 	"flyEffectAttenuateSpeed"	"200"
 	
