@@ -4410,6 +4410,7 @@ bool idPlayer::Give( const char *statname, const char *value, bool dropped ) {
 		
 				createBombNT(bomb_spawn, "projectile_grenade");
 			}
+			StartSound( "snd_airGasp", SND_CHANNEL_ITEM, 0, false, NULL );
 			nt_canSpawnBomb = false;
 		}
 
@@ -4570,6 +4571,7 @@ bool idPlayer::GiveItem( idItem *item ) {
 		
 				createBombNT(bomb_spawn, "projectile_grenade");
 			}
+			StartSound( "snd_airGasp", SND_CHANNEL_ITEM, 0, false, NULL );
 			nt_canSpawnBomb = false;
 		}
 	}
